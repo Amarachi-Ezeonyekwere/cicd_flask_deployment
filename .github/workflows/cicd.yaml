@@ -25,4 +25,4 @@ jobs:
         with:
           context: ./flask-todo   # <-- because your app code is inside flask-todo/
           push: true
-          tags: amarachiezeonyekwere/cicd-flask-todo:latest 
+          tags: amara3000/cicd-flask-todo:latest 

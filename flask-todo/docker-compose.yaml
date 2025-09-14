@@ -1,0 +1,16 @@
+version: "3.9"  # latest supported stable compose file version
+
+services:
+  web:
+    build: .
+    container_name: flask_todo_app
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - sqlite_data:/app/instance
+    environment:
+      FLASK_ENV: development
+
+volumes:
+  sqlite_data:

@@ -45,8 +45,13 @@ def delete(todo_id):
     db.session.commit()
     return redirect(url_for("home"))
 
+import os
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    # Read environment variables (default: secure values)
+    debug_mode = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("FLASK_PORT", "5000"))
+
+    app.run(debug=debug_mode, host=host, port=port)
 

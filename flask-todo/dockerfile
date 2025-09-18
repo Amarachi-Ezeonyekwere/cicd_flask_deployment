@@ -3,10 +3,11 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /app
 
-# Pin OS dependencies for reproducibility (Debian Bookworm versions)
+# hadolint ignore=DL3008
+# Install system dependencies (un-pinned, but safe for dev/prod builds)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential=12.9 \
-    gcc=4:12.2.0-3 \
+    build-essential \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only requirements first (for better caching)

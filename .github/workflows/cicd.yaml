@@ -46,7 +46,7 @@ jobs:
       # Dockerfile security checks
       # ----------------------------
       - name: Lint Dockerfile
-        run: docker run --rm -i hadolint/hadolint < flask-todo/Dockerfile
+        run: docker run --rm -i hadolint/hadolint < ./flask-todo/Dockerfile
 
       # ----------------------------
       # Build Docker image

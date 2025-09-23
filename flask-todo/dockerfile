@@ -6,8 +6,8 @@ WORKDIR /app
 # hadolint ignore=DL3008
 # Install system dependencies (un-pinned, but safe for dev/prod builds)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
+    build-essential=12.12 \
+    gcc=4:14.2.0-1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only requirements first (for better caching)

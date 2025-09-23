@@ -24,6 +24,9 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         with:
           args: detect --source . --no-git --redact
+      - name: Add summary for Gitleaks
+        if: always()
+        run: echo "### 🔐 Secret Scan\n- ✅ Gitleaks scan completed" >> $GITHUB_STEP_SUMMARY
 
       # ----------------------------
       # Python security checks
@@ -38,15 +41,24 @@ jobs:
 
       - name: Run Bandit (Python security analysis)
         run: pip install bandit && bandit -r flask-todo
+      - name: Add summary for Bandit
+        if: always()
+        run: echo "### 🛡️ Bandit\n- ✅ Python security analysis completed" >> $GITHUB_STEP_SUMMARY
 
       - name: Run pip-audit (Dependency vulnerabilities)
         run: pip install pip-audit && pip-audit -r flask-todo/requirements.txt
+      - name: Add summary for pip-audit
+        if: always()
+        run: echo "### 📦 pip-audit\n- ✅ Dependency vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
 
       # ----------------------------
       # Dockerfile security checks
       # ----------------------------
       - name: Lint Dockerfile
         run: docker run --rm -i hadolint/hadolint < ./flask-todo/dockerfile
+      - name: Add summary for Hadolint
+        if: always()
+        run: echo "### 🐳 Hadolint\n- ✅ Dockerfile linting completed" >> $GITHUB_STEP_SUMMARY
 
       # ----------------------------
       # Build Docker image
@@ -63,6 +75,9 @@ jobs:
           context: ./flask-todo
           push: true
           tags: amara3000/cicd-flask-todo:latest
+      - name: Add summary for Docker Build
+        if: always()
+        run: echo "### 🏗️ Docker Build\n- ✅ Image built and pushed to Docker Hub" >> $GITHUB_STEP_SUMMARY
 
       # ----------------------------
       # Post-build image vulnerability scan
@@ -74,3 +89,6 @@ jobs:
           format: 'table'
           exit-code: '1' # fail if vulnerabilities found
           severity: 'CRITICAL,HIGH'
+      - name: Add summary for Trivy
+        if: always()
+        run: echo "### 🔎 Trivy Scan\n- ✅ Image vulnerability scan completed" >> $GITHUB_STEP_SUMMARY

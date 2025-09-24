@@ -1,6 +1,6 @@
 # test_app.py
 
-from flask-todo.app import app
+from flask_todo.app import app
 
 def test_home_page():
     tester = app.test_client()

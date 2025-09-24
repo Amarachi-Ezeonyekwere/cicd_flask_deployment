@@ -10,59 +10,103 @@ on:
     branches: [ master ]
 
 jobs:
-  build-and-push:
+  # ----------------------------
+  # 1. Security + Code Quality
+  # ----------------------------
+  security-scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # ----------------------------
-      # Secret scanning
-      # ----------------------------
       - name: Scan for secrets with Gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
           args: detect --source . --no-git --redact
+
       - name: Add summary for Gitleaks
         if: always()
-        run: echo "### 🔐 Secret Scan\n- ✅ Gitleaks scan completed" >> $GITHUB_STEP_SUMMARY
+        run: echo "###  Secret Scan\n- ✅ Gitleaks scan completed" >> $GITHUB_STEP_SUMMARY
 
-      # ----------------------------
-      # Python security checks
-      # ----------------------------
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
 
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install dependencies
         run: pip install -r flask-todo/requirements.txt
 
-      - name: Run Bandit (Python security analysis)
+      - name: Run Bandit
         run: pip install bandit && bandit -r flask-todo
       - name: Add summary for Bandit
         if: always()
-        run: echo "### 🛡️ Bandit\n- ✅ Python security analysis completed" >> $GITHUB_STEP_SUMMARY
+        run: echo "###  Bandit\n- ✅ Python security analysis completed" >> $GITHUB_STEP_SUMMARY
 
-      - name: Run pip-audit (Dependency vulnerabilities)
+      - name: Run pip-audit
         run: pip install pip-audit && pip-audit -r flask-todo/requirements.txt
       - name: Add summary for pip-audit
         if: always()
-        run: echo "### 📦 pip-audit\n- ✅ Dependency vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
+        run: echo "###  pip-audit\n- ✅ Dependency vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
 
-      # ----------------------------
-      # Dockerfile security checks
-      # ----------------------------
       - name: Lint Dockerfile
-        run: docker run --rm -i hadolint/hadolint < ./flask-todo/dockerfile
+        run: docker run --rm -i hadolint/hadolint < ./flask-todo/Dockerfile
       - name: Add summary for Hadolint
         if: always()
-        run: echo "### 🐳 Hadolint\n- ✅ Dockerfile linting completed" >> $GITHUB_STEP_SUMMARY
+        run: echo "###  Hadolint\n- ✅ Dockerfile linting completed" >> $GITHUB_STEP_SUMMARY
 
-      # ----------------------------
-      # Build Docker image
-      # ----------------------------
+  # ----------------------------
+  # 2. Run Tests
+  # ----------------------------
+  tests:
+    runs-on: ubuntu-latest
+    needs: security-scan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r flask-todo/requirements.txt
+
+      - name: Run Pytest
+        run: pytest -v
+      - name: Add summary for Pytest
+        if: always()
+        run: echo "###  Pytest\n- ✅ Unit tests completed" >> $GITHUB_STEP_SUMMARY
+
+  # ----------------------------
+  # 3. Build + Push Docker Image
+  # ----------------------------
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -77,18 +121,43 @@ jobs:
           tags: amara3000/cicd-flask-todo:latest
       - name: Add summary for Docker Build
         if: always()
-        run: echo "### 🏗️ Docker Build\n- ✅ Image built and pushed to Docker Hub" >> $GITHUB_STEP_SUMMARY
+        run: echo "###  Docker Build\n- ✅ Image built and pushed to Docker Hub" >> $GITHUB_STEP_SUMMARY
 
-      # ----------------------------
-      # Post-build image vulnerability scan
-      # ----------------------------
+  # ----------------------------
+  # 4. Scan Docker Image
+  # ----------------------------
+  image-scan:
+    runs-on: ubuntu-latest
+    needs: docker-build
+
+    steps:
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: amara3000/cicd-flask-todo:latest
           format: 'table'
-          exit-code: '1' # fail if vulnerabilities found
+          exit-code: '1'
           severity: 'CRITICAL,HIGH'
       - name: Add summary for Trivy
         if: always()
-        run: echo "### 🔎 Trivy Scan\n- ✅ Image vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
+        run: echo "###  Trivy Scan\n- ✅ Image vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
+
+  # ----------------------------
+  # 5. Deploy to EC2
+  # ----------------------------
+  deploy:
+    runs-on: ubuntu-latest
+    needs: image-scan
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull amara3000/cicd-flask-todo:latest
+            docker stop flask_todo_app || true
+            docker rm flask_todo_app || true
+            docker run -d --name flask_todo_app -p 80:5000 amara3000/cicd-flask-todo:latest

@@ -1,97 +1,42 @@
-# 📝 Flask To-Do App (Containerized with CI/CD)
+##  Project Overview  
 
-## 📌 Project Overview
-This project is a **simple Python Flask-based To-Do List application**, containerized using **Docker** and automated through a **CI/CD pipeline**.  
-The goal is to showcase practical **DevOps and Cloud Computing skills** while solving a real-world business need: **managing tasks efficiently and reliably**.
+This project is a **Python Flask-based To-Do List application** built to demonstrate **end-to-end DevOps, DevSecOps and Cloud Engineering practices**.  
 
----
-
-## 💡 Business Problem
-Managing tasks is a common challenge for both individuals and teams.  
-The **Flask To-Do App** solves this by:
-- Providing a lightweight, web-based task management solution.  
-- Running in a **containerized environment** for easy deployment.  
-- Ensuring consistent builds and deployments through **CI/CD automation**.  
-- Storing tasks in a persistent **SQLite database**, so no data is lost between runs.  
-
-This mimics how modern organizations manage microservices: reliable, reproducible, and scalable.
+##  Key highlights:  
+- **Containerized with Docker** for easy portability  
+- **Automated CI/CD with GitHub Actions**, including:  
+  - Build & push of Docker images to Docker Hub and Amazon EKS  
+  - Security checks (Trivy, Hadolint, pip-audit, Gitleaks)  
+  - Automated testing & validation before deployment  
+- **Infrastructure as Code with Terraform** for AWS resources (EKS, S3, CloudWatch)  
+- **Kubernetes (EKS)** for scalable, resilient orchestration  
+- **Future enhancements**: Helm charts, GitOps with ArgoCD, advanced monitoring (Prometheus, Grafana)  
 
 ---
 
-## ⚙️ Tech Stack
-- **Python** (Flask framework) – backend web application.  
-- **SQLite** – lightweight, persistent database for storing tasks.  
-- **Docker** – containerization for portability and reproducibility.  
-- **Docker Hub** – image repository for storing and sharing builds.  
-- **CI/CD Pipeline** – automates build and push steps (e.g., GitHub Actions or similar).  
+##  Business Problem  
+
+Task management is a **common business requirement**, but organizations need more than just a to-do list.  
+They require applications that are:  
+- **Secure** → free from vulnerabilities and secrets exposure  
+- **Reliable** → tested, monitored, and resilient to failure  
+- **Scalable** → able to handle growth without performance issues  
+
+This project addresses task management while also demonstrating how to build, test, secure, and deploy applications in a **production-ready DevSecOps pipeline**.  
 
 ---
 
-## ✅ What Has Been Done
-- Built a **Flask web app** for a simple to-do list.  
-- Containerized the app with a **Dockerfile**.  
-- Configured **docker-compose.yml** for local development.  
-- Pushed Docker images automatically to **Docker Hub** using CI/CD.  
-- Verified **database persistence** (tasks remain available after restarts).  
+##  Why This Project Matters  
 
----
+This repository simulates a **real-world DevSecOps workflow** from end to end:  
+- **Code development** → write features in Python (Flask)  
+- **Security enforcement** → integrate automated scans and dependency audits  
+- **CI/CD delivery** → build, test, and push with GitHub Actions  
+- **Cloud-native deployment** → orchestrate containers on AWS EKS with Terraform  
 
-## 🔄 Ongoing & Future Iterations
-This project is continuously evolving to demonstrate advanced DevOps practices:
+It goes beyond solving task management — it shows how modern engineering teams can:  
+- **Reduce risks** by embedding security early  
+- **Ensure quality** through automated testing and pipelines  
+- **Deliver faster** with scalable, repeatable infrastructure  
 
-1. **Security Enhancements**
-   - Add **SAST (Static Application Security Testing)** to scan for code vulnerabilities.  
-   - Add Trivy **dependency vulnerability checks** before integration and deployment.  
-
-2. **Kubernetes Deployment**
-   - Extend deployment to a **Kubernetes cluster** for scalability and reliability.  
-   - Configure **Helm charts** or Kubernetes manifests for automated rollout.  
-
-3. **Monitoring & Observability**
-   - Integrate monitoring tools (e.g., Prometheus, Grafana).  
-   - Add centralized logging with ELK stack (Elasticsearch, Logstash, Kibana).  
-
-4. **Cloud Deployment**
-   - Push the application to a cloud provider (AWS) with IaC tools like **Terraform**.  
-
----
-
-## 🚀 How to Run Locally
-Clone the repository:
-```bash
-git clone https://github.com/your-username/flask-todo.git
-cd flask-todo
-````
-
-Build and run with Docker:
-
-```bash
-docker-compose up --build
-```
-
-Access the app at:
-👉 [http://localhost:5000](http://localhost:5000)
-
----
-
-## 🤝 Contributing
-
-* Fork the repository.
-* Create a feature branch (`git checkout -b feature-name`).
-* Commit your changes and push.
-* Open a Pull Request.
-
-Contributions, suggestions, and improvements are welcome!
-
----
-
-## 📈 Why This Project Matters
-
-This repository is part of my **DevOps & Cloud Engineering journey**.
-It highlights my ability to:
-
-* Build and containerize applications.
-* Automate deployments with CI/CD.
-* Implement ongoing improvements in **security, scalability, and observability**.
-
-
+The goal is not just to build an app, but to showcase **complete DevSecOps and Cloud Engineering skills** that are directly applicable to enterprise scenarios.

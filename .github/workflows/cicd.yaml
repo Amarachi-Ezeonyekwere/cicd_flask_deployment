@@ -43,22 +43,22 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        run: pip install -r flask-todo/requirements.txt
+        run: pip install -r flask_todo/requirements.txt
 
       - name: Run Bandit
-        run: pip install bandit && bandit -r flask-todo
+        run: pip install bandit && bandit -r flask_todo
       - name: Add summary for Bandit
         if: always()
         run: echo "###  Bandit\n- ✅ Python security analysis completed" >> $GITHUB_STEP_SUMMARY
 
       - name: Run pip-audit
-        run: pip install pip-audit && pip-audit -r flask-todo/requirements.txt
+        run: pip install pip-audit && pip-audit -r flask_todo/requirements.txt
       - name: Add summary for pip-audit
         if: always()
         run: echo "###  pip-audit\n- ✅ Dependency vulnerability scan completed" >> $GITHUB_STEP_SUMMARY
 
       - name: Lint Dockerfile
-        run: docker run --rm -i hadolint/hadolint < ./flask-todo/dockerfile
+        run: docker run --rm -i hadolint/hadolint < ./flask_todo/dockerfile
       - name: Add summary for Hadolint
         if: always()
         run: echo "###  Hadolint\n- ✅ Dockerfile linting completed" >> $GITHUB_STEP_SUMMARY
@@ -88,7 +88,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        run: pip install -r flask-todo/requirements.txt
+        run: pip install -r flask_todo/requirements.txt
 
       - name: Run Pytest
         run: pytest -v
@@ -116,9 +116,9 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./flask-todo
+          context: ./flask_todo
           push: true
-          tags: amara3000/cicd-flask-todo:latest
+          tags: amara3000/cicd-flask_todo:latest
       - name: Add summary for Docker Build
         if: always()
         run: echo "###  Docker Build\n- ✅ Image built and pushed to Docker Hub" >> $GITHUB_STEP_SUMMARY
@@ -134,7 +134,7 @@ jobs:
       - name: Scan Docker Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: amara3000/cicd-flask-todo:latest
+          image-ref: amara3000/cicd-flask_todo:latest
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL,HIGH'
@@ -157,7 +157,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull amara3000/cicd-flask-todo:latest
+            docker pull amara3000/cicd-flask_todo:latest
             docker stop flask_todo_app || true
             docker rm flask_todo_app || true
-            docker run -d --name flask_todo_app -p 80:5000 amara3000/cicd-flask-todo:latest
+            docker run -d --name flask_todo_app -p 80:5000 amara3000/cicd-flask_todo:latest
